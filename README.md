@@ -2,6 +2,36 @@
 To manage ad and to make people aware.
 
 
+# To purge:
+
+```
+https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js
+
+https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/config.json
+
+https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/negative.html
+
+https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/negative.html
+
+https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/promo.html
+
+```
+
+## Current cached value
+
+```
+https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js
+
+https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/config.json
+
+https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/negative.html
+
+https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/negative.html
+
+https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/promo.html
+```
+
+
 # Note
 
 Just need to add the following code just before of the </body> on the base.html within the template. 
