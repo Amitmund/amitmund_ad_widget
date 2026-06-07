@@ -4,21 +4,21 @@
 
   "ads": [
     {
-      "template": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/positive.html",
+      "template": "positive",
       "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
       "title": "",
       "message": "Trusted by thousands",
       "url": "https://sretoolkit.com/blog/post/widgetjs/"
     },
     {
-      "template": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/negative.html",
+      "template": "negative",
       "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/pradeep-painter.jpeg",
       "title": "On Public Interest",
       "message": "DO NOT TRUST - Pradeep From Raipur, House Color Contractor - 6393260901",
       "url": "https://SREToolkit.com"
     },
     {
-      "template": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/promo.html",
+      "template": "promo",
       "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
       "title": "Car Sell on Bhawanipatna",
       "message": "Car Sell on Bhawanipatna contact me.",
