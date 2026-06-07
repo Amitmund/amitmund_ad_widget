@@ -201,9 +201,31 @@
         text-overflow: ellipsis;
       }
 
-      .positive { border-left: 4px solid #2ecc71; background: #eaffea; }
-      .negative { border-left: 4px solid #e74c3c; background: #fff0f0; }
-      .promo    { border-left: 4px solid #3498db; background: #eef5ff; }
+      .positive {
+        border-left: 6px solid #16a34a;
+        background: linear-gradient(90deg, #ecfdf5, #ffffff);
+      }
+      
+      .negative {
+        border-left: 6px solid #dc2626;
+        background: linear-gradient(90deg, #fef2f2, #ffffff);
+        position: relative;
+      }
+      
+      .negative::after {
+        content: "⚠";
+        position: absolute;
+        top: 6px;
+        right: 10px;
+        font-size: 14px;
+      }
+      
+      .promo {
+        border-left: 6px solid #2563eb;
+        background: linear-gradient(90deg, #eff6ff, #ffffff);
+      }
+
+
     `;
 
     document.head.appendChild(style);
