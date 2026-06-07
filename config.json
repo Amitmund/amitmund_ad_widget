@@ -4,7 +4,7 @@
   "ads": [
     {
       "template": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/positive.html",
-      "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/assets/images/img1.jpg",
+      "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
       "title": "Verified Partner",
       "message": "Trusted by thousands",
       "url": "https://example.com"
@@ -18,10 +18,10 @@
     },
     {
       "template": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/promo.html",
-      "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/assets/images/img3.jpg",
-      "title": "Summer Sale",
-      "message": "Up to 50% off",
-      "url": "https://example.com/sale"
+      "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
+      "title": "Car Sell on Bhawanipatna",
+      "message": "Car Sell on Bhawanipatna contact me.",
+      "url": "https://sretoolkit.com/blog/post/widgetjs/"
     }
   ]
 }
