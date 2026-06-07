@@ -72,4 +72,6 @@ Auto-injected scripts
 
 #### Troubleshooting using the `console.log`
 
+```
 console.log("Ad Config Version:", config.version);
+```
