@@ -1,12 +1,12 @@
 {
-  "version": "1.0.2",
-  "scrollSpeed": .8,
+  "version": "1.0.3",
+  "scrollSpeed": 1,
 
   "ads": [
     {
       "template": "positive",
       "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
-      "title": "",
+      "title": "For Public Interest",
       "message": "Trusted by thousands",
       "url": "https://sretoolkit.com/blog/post/widgetjs/"
     },
