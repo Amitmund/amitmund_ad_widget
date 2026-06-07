@@ -9,11 +9,6 @@ https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js
 
 https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/config.json
 
-https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/negative.html
-
-https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/negative.html
-
-https://purge.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/promo.html
 
 ```
 
@@ -24,11 +19,6 @@ https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js
 
 https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/config.json
 
-https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/negative.html
-
-https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/negative.html
-
-https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/templates/promo.html
 ```
 
 
