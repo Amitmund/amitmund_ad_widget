@@ -170,13 +170,15 @@
         background: #f7f7f7;
       }
 
+
       .ad-img {
-        width: 56px;
-        height: 56px;
-        object-fit: cover;
-        border-radius: 8px;
-        margin: 0 10px;
-      }
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 0 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
 
       .ad-body {
         display: flex;
