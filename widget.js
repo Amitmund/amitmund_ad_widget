@@ -9,14 +9,14 @@
   window.__AD_RAIL_LOADED__ = true;
 
   // -----------------------------
-  // Init wrapper (DOM safe)
+  // Safe init
   // -----------------------------
   function init() {
     console.log("AD WIDGET LOADED");
 
     loadConfig()
       .then(config => {
-        if (!config || !config.ads || !config.ads.length) return;
+        if (!Array.isArray(config?.ads) || config.ads.length === 0) return;
         buildWidget(config);
       })
       .catch(err => {
@@ -31,16 +31,21 @@
   }
 
   // -----------------------------
-  // Load config safely
+  // Safe config loader
   // -----------------------------
   async function loadConfig() {
-    const res = await fetch(CONFIG_URL, { cache: "no-cache" });
-    if (!res.ok) throw new Error("Config load failed");
-    return await res.json();
+    try {
+      const res = await fetch(CONFIG_URL, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return await res.json();
+    } catch (e) {
+      console.error("Config load failed:", e);
+      return null;
+    }
   }
 
   // -----------------------------
-  // Build entire widget
+  // Build widget
   // -----------------------------
   function buildWidget(config) {
     injectStyles();
@@ -52,24 +57,23 @@
     track.className = "ad-track";
 
     rail.appendChild(track);
-    document.body.appendChild(rail);
 
-    // Build cards
+    // Safe append (body fallback included)
+    (document.body || document.documentElement).appendChild(rail);
+
     const cards = config.ads.map(createCard);
 
-    // Append original
+    // Add originals
     cards.forEach(c => track.appendChild(c));
 
-    // Safe duplication (no innerHTML hack)
-    cards.forEach(c => {
-      track.appendChild(c.cloneNode(true));
-    });
+    // Safe clone (no innerHTML hack)
+    cards.forEach(c => track.appendChild(c.cloneNode(true)));
 
     startScroll(track, rail, config.scrollSpeed || 1);
   }
 
   // -----------------------------
-  // Create single card
+  // Create ad card
   // -----------------------------
   function createCard(ad) {
     const a = document.createElement("a");
@@ -77,10 +81,11 @@
     a.className = `ad-card ${ad.template || "promo"}`;
     a.href = ad.url || "#";
     a.target = "_blank";
+    a.rel = "noopener noreferrer";
 
     a.innerHTML = `
       <img class="ad-img" src="${ad.image}" 
-           onerror="this.style.display='none'" />
+           onerror="this.src='https://via.placeholder.com/56?text=Ad'" />
       <div class="ad-body">
         <div class="ad-title">${ad.title || ""}</div>
         <div class="ad-msg">${ad.message || ""}</div>
@@ -91,11 +96,12 @@
   }
 
   // -----------------------------
-  // Smooth scroll engine
+  // Scroll engine
   // -----------------------------
   function startScroll(track, rail, speed) {
     let x = 0;
     let paused = false;
+    let raf;
 
     rail.addEventListener("mouseenter", () => (paused = true));
     rail.addEventListener("mouseleave", () => (paused = false));
@@ -113,14 +119,14 @@
         track.style.transform = `translateX(${x}px)`;
       }
 
-      requestAnimationFrame(animate);
+      raf = requestAnimationFrame(animate);
     }
 
     animate();
   }
 
   // -----------------------------
-  // Inject styles (isolated)
+  // Styles (safe inject once)
   // -----------------------------
   function injectStyles() {
     if (document.getElementById("ad-rail-style")) return;
@@ -143,7 +149,6 @@
 
       .ad-track {
         display: flex;
-        flex-direction: row;
         gap: 12px;
         width: max-content;
         align-items: center;
@@ -183,7 +188,6 @@
       .ad-title {
         font-size: 13px;
         font-weight: 600;
-        line-height: 1.2;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
