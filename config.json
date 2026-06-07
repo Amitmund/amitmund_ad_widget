@@ -1,0 +1,27 @@
+{
+  "scrollSpeed": 1,
+
+  "ads": [
+    {
+      "template": "positive",
+      "image": "https://cdn.example.com/assets/img1.jpg",
+      "title": "Verified Partner",
+      "message": "Trusted by thousands",
+      "url": "https://example.com"
+    },
+    {
+      "template": "negative",
+      "image": "https://cdn.example.com/assets/img2.jpg",
+      "title": "Risk Alert",
+      "message": "Reported issues found",
+      "url": "https://example.com/risk"
+    },
+    {
+      "template": "promo",
+      "image": "https://cdn.example.com/assets/img3.jpg",
+      "title": "Summer Sale",
+      "message": "Up to 50% off",
+      "url": "https://example.com/sale"
+    }
+  ]
+}
