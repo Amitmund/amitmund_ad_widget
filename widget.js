@@ -1,6 +1,6 @@
 (async function () {
   const CONFIG_URL =
-    "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/";
+    "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js";
 
   // -----------------------------
   // Load Config
