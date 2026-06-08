@@ -2,6 +2,36 @@
 To manage ad and to make people aware.
 
 
+# To be able to run the add
+
+### Just add the following 1 line at your website.
+
+```
+<script defer src="https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js?ts=20260607002"></script>
+```
+
+```
+<!-- ================= SCRIPTS ================= -->
+    <script src="/static/js/copyrights.js?v="></script>
+    <script src="/static/js/detail-catalog-script.js"></script>
+    <script src="/static/js/scroll-to-top.js"></script>
+
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+
+    <!-- Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        lucide.createIcons();
+    });
+    </script>
+
+    <!-- ================= AD RAIL WIDGET ================= -->
+    <script defer src="https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js?ts=20260607002"></script>
+
+```
+
 # To purge:
 
 ```
