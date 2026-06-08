@@ -1,5 +1,5 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "scrollSpeed": 1,
 
   "ads": [
@@ -8,7 +8,7 @@
       "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
       "title": "For Public Interest",
       "message": "Trusted by thousands",
-      "url": "https://sretoolkit.com/blog/post/widgetjs/"
+      "url": "https://sretoolkit.com/ads/go/car-on-sell-at-bhawanipatna/"
     },
     {
       "template": "negative",
@@ -22,7 +22,7 @@
       "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
       "title": "Car Sell on Bhawanipatna",
       "message": "Car Sell on Bhawanipatna contact me.",
-      "url": "https://sretoolkit.com/blog/post/widgetjs/"
+      "url": "https://sretoolkit.com/ads/go/car-on-sell-at-bhawanipatna/"
     }
   ]
 }
