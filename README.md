@@ -2,6 +2,15 @@
 To manage ad and to make people aware.
 
 
+# Purge:
+https://www.jsdelivr.com/tools/purge
+
+# To generate CDN from github
+
+https://www.jsdelivr.com/github
+
+---
+
 # To be able to run the add
 
 ### Just add the following 1 line at your website.
