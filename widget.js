@@ -1,26 +1,24 @@
 (function () {
-  const CONFIG_URL =
-    "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/config.json";
+  const CONFIG_URL = "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/config.json";
+  
+  // ⚙️ DOM BUDGET: Max unique ads allowed in the bar tracking container simultaneously
+  const MAX_DISPLAY_ADS = 8;
 
-  // -----------------------------
-  // Prevent duplicate injection
-  // -----------------------------
   if (window.__AD_RAIL_LOADED__) return;
   window.__AD_RAIL_LOADED__ = true;
 
-  // -----------------------------
-  // Safe init
-  // -----------------------------
   function init() {
-    console.log("AD WIDGET LOADED");
-
     loadConfig()
       .then(config => {
-        if (!Array.isArray(config?.ads) || config.ads.length === 0) return;
+        if (!config || !Array.isArray(config.ads) || config.ads.length === 0) return;
+        
+        // 🎯 Compute Weighted Roulette Selection & Slicing
+        config.ads = processWeightedPriorities(config.ads, MAX_DISPLAY_ADS);
+        
         buildWidget(config);
       })
       .catch(err => {
-        console.error("AD WIDGET ERROR:", err);
+        console.error("AD WIDGET LOG ERROR:", err);
       });
   }
 
@@ -30,23 +28,71 @@
     init();
   }
 
-  // -----------------------------
-  // Safe config loader
-  // -----------------------------
   async function loadConfig() {
     try {
       const res = await fetch(CONFIG_URL, { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
+      if (!res.ok) throw new Error("HTTP Status " + res.status);
       return await res.json();
     } catch (e) {
-      console.error("Config load failed:", e);
+      console.error("Config network load failure:", e);
       return null;
     }
   }
 
-  // -----------------------------
-  // Build widget
-  // -----------------------------
+  // 🧠 Weighted Probability Roulette Selection Engine
+  function processWeightedPriorities(allAds, maxBudget) {
+    // 1. Instantly isolate critical safety notices so they bypass the lottery completely
+    const criticalAlerts = allAds.filter(ad => 
+      ad.template_type === 'negative' || ad.template === 'negative'
+    );
+
+    // 2. Isolate normal candidates for the weighted selection pool
+    const lotteryPool = allAds.filter(ad => 
+      ad.template_type !== 'negative' && ad.template !== 'negative'
+    );
+
+    const chosenAds = [...criticalAlerts];
+    
+    // 3. Roulette wheel loop selection down to display budget capacity boundaries
+    while (chosenAds.length < maxBudget && lotteryPool.length > 0) {
+      // Calculate active collective weights sum of items remaining in pool
+      let totalWeight = 0;
+      for (let i = 0; i < lotteryPool.length; i++) {
+        // Fallback safely to priority 1 if omitted, non-numeric, or negative
+        const weight = Number(lotteryPool[i].priority);
+        totalWeight += (!isNaN(weight) && weight > 0) ? weight : 1;
+      }
+
+      // Roll a random fractional pointer across the spectrum scale lines
+      let randomRoll = Math.random() * totalWeight;
+      
+      // Step through items until the selection point intersects an ad's segment space
+      for (let i = 0; i < lotteryPool.length; i++) {
+        const weight = Number(lotteryPool[i].priority);
+        const activeWeight = (!isNaN(weight) && weight > 0) ? weight : 1;
+        
+        randomRoll -= activeWeight;
+        if (randomRoll <= 0) {
+          // Splice selected ad out of lottery pool to avoid duplicates, move to chosen collection
+          chosenAds.push(lotteryPool.splice(i, 1)[0]);
+          break;
+        }
+      }
+    }
+
+    // 4. Shuffle the final combined list so pinned alerts aren't statically stuck at index 0
+    return shuffleArray(chosenAds);
+  }
+
+  // 🎲 In-Place Fisher-Yates Shuffling Algorithm
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
   function buildWidget(config) {
     injectStyles();
 
@@ -56,32 +102,38 @@
     const track = document.createElement("div");
     track.className = "ad-track";
 
+    // Dynamic scroll duration scales relative to active cards list density counts
+    const calculatedSpeed = config.scrollSpeed || 1;
+    const duration = Math.max(5, (config.ads.length * 5) / calculatedSpeed);
+    track.style.setProperty('--scroll-duration', `${duration}s`);
+
+    const originalCards = config.ads.map(createCard);
+    const clonedCards = config.ads.map(createCard);
+
+    originalCards.forEach(card => track.appendChild(card));
+    clonedCards.forEach(clone => {
+      clone.setAttribute('aria-hidden', 'true');
+      track.appendChild(clone);
+    });
+
     rail.appendChild(track);
-
     (document.body || document.documentElement).appendChild(rail);
-
-    const cards = config.ads.map(createCard);
-
-    cards.forEach(c => track.appendChild(c));
-    cards.forEach(c => track.appendChild(c.cloneNode(true)));
-
-    startScroll(track, rail, config.scrollSpeed || 1);
   }
 
-  // -----------------------------
-  // Create ad card
-  // -----------------------------
   function createCard(ad) {
     const a = document.createElement("a");
-
-    a.className = `ad-card ${ad.template || "promo"}`;
+    const currentTheme = ad.template_type || ad.template || "promo";
+    
+    a.className = `ad-card ${currentTheme}`;
     a.href = ad.url || "#";
     a.target = "_blank";
     a.rel = "noopener noreferrer";
 
     a.innerHTML = `
-      <img class="ad-img" src="${ad.image}" 
-           onerror="this.src='https://via.placeholder.com/56?text=Ad'" />
+      <img class="ad-img" src="${ad.image || ad.image_url}" 
+           loading="lazy"
+           onerror="this.onerror=null; this.src='https://via.placeholder.com/56?text=Ad'" 
+           alt="${ad.title || 'Advertisement'} Thumbnail" />
       <div class="ad-body">
         <div class="ad-title">${ad.title || ""}</div>
         <div class="ad-msg">${ad.message || ""}</div>
@@ -91,43 +143,17 @@
     return a;
   }
 
-  // -----------------------------
-  // Scroll engine
-  // -----------------------------
-  function startScroll(track, rail, speed) {
-    let x = 0;
-    let paused = false;
-
-    rail.addEventListener("mouseenter", () => (paused = true));
-    rail.addEventListener("mouseleave", () => (paused = false));
-
-    function animate() {
-      if (!paused) {
-        x -= speed;
-
-        const half = track.scrollWidth / 2;
-
-        if (Math.abs(x) >= half) x = 0;
-
-        track.style.transform = `translateX(${x}px)`;
-      }
-
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-  }
-
-  // -----------------------------
-  // Styles
-  // -----------------------------
   function injectStyles() {
     if (document.getElementById("ad-rail-style")) return;
 
     const style = document.createElement("style");
     style.id = "ad-rail-style";
-
     style.innerHTML = `
+      #ad-rail, #ad-rail *, .ad-track, .ad-card {
+        box-sizing: border-box !important;
+        margin: 0;
+        padding: 0;
+      }
       #ad-rail {
         position: fixed;
         bottom: 0;
@@ -135,123 +161,113 @@
         width: 100%;
         height: 100px;
         overflow: hidden;
-        background: #fff;
+        background: #ffffff;
         z-index: 2147483647;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.12);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
       }
-
       .ad-track {
         display: flex;
-        gap: 12px;
+        gap: 16px;
         width: max-content;
         align-items: center;
-        padding: 10px;
+        padding: 10px 16px;
         will-change: transform;
+        animation: adRailInfiniteLinearLoop var(--scroll-duration, 30s) linear infinite;
       }
-
+      #ad-rail:hover .ad-track {
+        animation-play-state: paused;
+      }
       .ad-card {
         position: relative;
         display: flex;
         align-items: center;
-        width: 240px;
+        width: 260px;
         height: 80px;
         flex-shrink: 0;
-        border-radius: 10px;
+        border-radius: 12px;
         overflow: hidden;
-        text-decoration: none;
-        font-family: Arial, sans-serif;
-        color: #111;
-        background: #f7f7f7;
+        text-decoration: none !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #111111 !important;
+        background: #f8fafc;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
       }
-
+      .ad-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
       .ad-img {
         width: 52px;
         height: 52px;
         object-fit: cover;
         border-radius: 8px;
-        margin: 0 10px;
-        border: 1px solid rgba(0,0,0,0.08);
+        margin: 0 12px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        background-color: #f1f5f9;
       }
-
       .ad-body {
         display: flex;
         flex-direction: column;
         justify-content: center;
         overflow: hidden;
+        padding-right: 45px;
       }
-
       .ad-title {
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 700;
+        line-height: 1.4;
+        color: #0f172a;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-
       .ad-msg {
         font-size: 11px;
-        opacity: 0.75;
+        font-weight: 400;
+        color: #64748b;
+        margin-top: 2px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-
+      
+      /* THEMES */
       .positive {
-        border-left: 6px solid #16a34a;
-        background: linear-gradient(90deg, #ecfdf5, #ffffff);
+        border-left: 5px solid #10b981;
+        background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 40%);
       }
-
       .negative {
-        border-left: 6px solid #dc2626;
-        background: linear-gradient(90deg, #fef2f2, #ffffff);
+        border-left: 5px solid #ef4444;
+        background: linear-gradient(90deg, #fef2f2 0%, #ffffff 40%);
       }
-
       .promo {
-        border-left: 6px solid #2563eb;
-        background: linear-gradient(90deg, #eff6ff, #ffffff);
+        border-left: 5px solid #3b82f6;
+        background: linear-gradient(90deg, #eff6ff 0%, #ffffff 40%);
       }
-
+      
       /* BADGES */
-      .ad-card.positive::before {
-        content: "POSITIVE";
+      .ad-card::before {
         position: absolute;
-        top: 6px;
+        top: 8px;
         right: 8px;
-        font-size: 9px;
-        font-weight: 700;
-        color: #16a34a;
-        background: rgba(255,255,255,0.8);
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
         padding: 2px 6px;
         border-radius: 4px;
+        line-height: 1;
       }
-
-      .ad-card.negative::before {
-        content: "WARNING";
-        position: absolute;
-        top: 6px;
-        right: 8px;
-        font-size: 9px;
-        font-weight: 700;
-        color: #dc2626;
-        background: rgba(255,255,255,0.8);
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-
-      .ad-card.promo::before {
-        content: "PROMO";
-        position: absolute;
-        top: 6px;
-        right: 8px;
-        font-size: 9px;
-        font-weight: 700;
-        color: #2563eb;
-        background: rgba(255,255,255,0.8);
-        padding: 2px 6px;
-        border-radius: 4px;
+      .ad-card.positive::before { content: "ACTIVE"; color: #047857; background: #d1fae5; }
+      .ad-card.negative::before { content: "ALERT"; color: #b91c1c; background: #fee2e2; }
+      .ad-card.promo::before { content: "PARTNER"; color: #1d4ed8; background: #dbeafe; }
+      
+      @keyframes adRailInfiniteLinearLoop {
+        0% { transform: translate3d(0, 0, 0); }
+        100% { transform: translate3d(-50%, 0, 0); }
       }
     `;
-
     document.head.appendChild(style);
   }
 })();
