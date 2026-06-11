@@ -4,32 +4,36 @@
 
   "ads": [
     {
-      "template": "positive",
-      "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
+      "template_type": "positive",
+      "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
       "title": "For Public Interest",
       "message": "Trusted by thousands",
-      "url": "https://sretoolkit.com/ads/go/car-on-sell-at-bhawanipatna/"
+      "url": "https://sretoolkit.com/ads/go/car-on-sell-at-bhawanipatna/",
+      "priority": 5
     },
     {
-      "template": "negative",
-      "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/pradeep-painter.jpeg",
+      "template_type": "negative",
+      "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/pradeep-painter.jpeg",
       "title": "On Public Interest",
       "message": "DO NOT TRUST - Pradeep From Raipur, House Color Contractor - 6393260901",
-      "url": "https://sretoolkit.com/ads/go/alert-pradeep-raipur-painter/"
+      "url": "https://sretoolkit.com/ads/go/alert-pradeep-raipur-painter/",
+      "priority": 10
     },
     {
-      "template": "promo",
-      "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
+      "template_type": "promo",
+      "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
       "title": "Car Sell on Bhawanipatna",
       "message": "Car Sell on Bhawanipatna contact me.",
-      "url": "https://sretoolkit.com/ads/go/car-on-sell-at-bhawanipatna/"
+      "url": "https://sretoolkit.com/ads/go/car-on-sell-at-bhawanipatna/",
+      "priority": 3
     },
-        {
-      "template": "promo",
-      "image": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/SubhransuTandi.jpeg",
+    {
+      "template_type": "promo",
+      "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/SubhransuTandi.jpeg",
       "title": "refrigeration(AC) Work at Bhawanipatna",
       "message": "CoolCareService, Bhawanipatna. Provide service related to, Home Appliance.",
-      "url": "https://sretoolkit.com/ads/go/refrigerationac-work-at-bhawanipatna/"
+      "url": "https://sretoolkit.com/ads/go/refrigerationac-work-at-bhawanipatna/",
+      "priority": 7
     }
   ]
 }
