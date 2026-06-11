@@ -1,5 +1,5 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.5",
   "scrollSpeed": 1,
 
   "ads": [
@@ -18,14 +18,6 @@
       "message": "DO NOT TRUST - Pradeep From Raipur, House Color Contractor - 6393260901",
       "url": "https://sretoolkit.com/ads/go/alert-pradeep-raipur-painter/",
       "priority": 10
-    },
-    {
-      "template_type": "promo",
-      "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
-      "title": "Car Sell on Bhawanipatna",
-      "message": "Car Sell on Bhawanipatna contact me.",
-      "url": "https://sretoolkit.com/ads/go/car-on-sell-at-bhawanipatna/",
-      "priority": 3
     },
     {
       "template_type": "promo",
