@@ -12,7 +12,7 @@
       .then(config => {
         if (!config || !Array.isArray(config.ads) || config.ads.length === 0) return;
         
-        // 🎯 Compute Weighted Roulette Selection & Slicing
+        // 🎯 Compute Weighted Roulette Selection & Slicing using streamlined single keys
         config.ads = processWeightedPriorities(config.ads, MAX_DISPLAY_ADS);
         
         buildWidget(config);
@@ -39,48 +39,39 @@
     }
   }
 
-  // 🧠 Weighted Probability Roulette Selection Engine
+  // 🧠 Streamlined Weighted Probability Roulette Selection Engine
   function processWeightedPriorities(allAds, maxBudget) {
-    // 1. Instantly isolate critical safety notices so they bypass the lottery completely
-    const criticalAlerts = allAds.filter(ad => 
-      ad.template_type === 'negative' || ad.template === 'negative'
-    );
+    // 1. Instantly isolate critical safety notices using ONLY template_type
+    const criticalAlerts = allAds.filter(ad => ad.template_type === 'negative');
 
     // 2. Isolate normal candidates for the weighted selection pool
-    const lotteryPool = allAds.filter(ad => 
-      ad.template_type !== 'negative' && ad.template !== 'negative'
-    );
+    const lotteryPool = allAds.filter(ad => ad.template_type !== 'negative');
 
     const chosenAds = [...criticalAlerts];
     
     // 3. Roulette wheel loop selection down to display budget capacity boundaries
     while (chosenAds.length < maxBudget && lotteryPool.length > 0) {
-      // Calculate active collective weights sum of items remaining in pool
       let totalWeight = 0;
       for (let i = 0; i < lotteryPool.length; i++) {
-        // Fallback safely to priority 1 if omitted, non-numeric, or negative
         const weight = Number(lotteryPool[i].priority);
         totalWeight += (!isNaN(weight) && weight > 0) ? weight : 1;
       }
 
-      // Roll a random fractional pointer across the spectrum scale lines
       let randomRoll = Math.random() * totalWeight;
       
-      // Step through items until the selection point intersects an ad's segment space
       for (let i = 0; i < lotteryPool.length; i++) {
         const weight = Number(lotteryPool[i].priority);
         const activeWeight = (!isNaN(weight) && weight > 0) ? weight : 1;
         
         randomRoll -= activeWeight;
         if (randomRoll <= 0) {
-          // Splice selected ad out of lottery pool to avoid duplicates, move to chosen collection
           chosenAds.push(lotteryPool.splice(i, 1)[0]);
           break;
         }
       }
     }
 
-    // 4. Shuffle the final combined list so pinned alerts aren't statically stuck at index 0
+    // 4. Shuffle the final combined list so pinned alerts don't camp at index 0
     return shuffleArray(chosenAds);
   }
 
@@ -102,7 +93,6 @@
     const track = document.createElement("div");
     track.className = "ad-track";
 
-    // Dynamic scroll duration scales relative to active cards list density counts
     const calculatedSpeed = config.scrollSpeed || 1;
     const duration = Math.max(5, (config.ads.length * 5) / calculatedSpeed);
     track.style.setProperty('--scroll-duration', `${duration}s`);
@@ -120,9 +110,10 @@
     (document.body || document.documentElement).appendChild(rail);
   }
 
+  // 🎨 Cleaned Card Generation (Strictly maps to image_url and template_type)
   function createCard(ad) {
     const a = document.createElement("a");
-    const currentTheme = ad.template_type || ad.template || "promo";
+    const currentTheme = ad.template_type || "promo";
     
     a.className = `ad-card ${currentTheme}`;
     a.href = ad.url || "#";
@@ -130,7 +121,7 @@
     a.rel = "noopener noreferrer";
 
     a.innerHTML = `
-      <img class="ad-img" src="${ad.image || ad.image_url}" 
+      <img class="ad-img" src="${ad.image_url}" 
            loading="lazy"
            onerror="this.onerror=null; this.src='https://via.placeholder.com/56?text=Ad'" 
            alt="${ad.title || 'Advertisement'} Thumbnail" />
