@@ -58,15 +58,11 @@
 
     rail.appendChild(track);
 
-    // Safe append (body fallback included)
     (document.body || document.documentElement).appendChild(rail);
 
     const cards = config.ads.map(createCard);
 
-    // Add originals
     cards.forEach(c => track.appendChild(c));
-
-    // Safe clone (no innerHTML hack)
     cards.forEach(c => track.appendChild(c.cloneNode(true)));
 
     startScroll(track, rail, config.scrollSpeed || 1);
@@ -101,7 +97,6 @@
   function startScroll(track, rail, speed) {
     let x = 0;
     let paused = false;
-    let raf;
 
     rail.addEventListener("mouseenter", () => (paused = true));
     rail.addEventListener("mouseleave", () => (paused = false));
@@ -112,21 +107,19 @@
 
         const half = track.scrollWidth / 2;
 
-        if (Math.abs(x) >= half) {
-          x = 0;
-        }
+        if (Math.abs(x) >= half) x = 0;
 
         track.style.transform = `translateX(${x}px)`;
       }
 
-      raf = requestAnimationFrame(animate);
+      requestAnimationFrame(animate);
     }
 
     animate();
   }
 
   // -----------------------------
-  // Styles (safe inject once)
+  // Styles
   // -----------------------------
   function injectStyles() {
     if (document.getElementById("ad-rail-style")) return;
@@ -157,6 +150,7 @@
       }
 
       .ad-card {
+        position: relative;
         display: flex;
         align-items: center;
         width: 240px;
@@ -170,15 +164,14 @@
         background: #f7f7f7;
       }
 
-
       .ad-img {
-      width: 52px;
-      height: 52px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin: 0 10px;
-      border: 1px solid rgba(0,0,0,0.08);
-    }
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin: 0 10px;
+        border: 1px solid rgba(0,0,0,0.08);
+      }
 
       .ad-body {
         display: flex;
@@ -207,27 +200,56 @@
         border-left: 6px solid #16a34a;
         background: linear-gradient(90deg, #ecfdf5, #ffffff);
       }
-      
+
       .negative {
         border-left: 6px solid #dc2626;
         background: linear-gradient(90deg, #fef2f2, #ffffff);
-        position: relative;
       }
-      
-      .negative::after {
-        content: "⚠";
-        position: absolute;
-        top: 6px;
-        right: 10px;
-        font-size: 14px;
-      }
-      
+
       .promo {
         border-left: 6px solid #2563eb;
         background: linear-gradient(90deg, #eff6ff, #ffffff);
       }
 
+      /* BADGES */
+      .ad-card.positive::before {
+        content: "POSITIVE";
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        font-size: 9px;
+        font-weight: 700;
+        color: #16a34a;
+        background: rgba(255,255,255,0.8);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
 
+      .ad-card.negative::before {
+        content: "WARNING";
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        font-size: 9px;
+        font-weight: 700;
+        color: #dc2626;
+        background: rgba(255,255,255,0.8);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+
+      .ad-card.promo::before {
+        content: "PROMO";
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        font-size: 9px;
+        font-weight: 700;
+        color: #2563eb;
+        background: rgba(255,255,255,0.8);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
     `;
 
     document.head.appendChild(style);
