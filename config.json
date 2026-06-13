@@ -26,6 +26,14 @@
       "message": "CoolCareService, Bhawanipatna. Provide service related to, Home Appliance.",
       "url": "https://sretoolkit.com/ads/go/refrigerationac-work-at-bhawanipatna/",
       "priority": 7
+    },
+        {
+      "template_type": "promo",
+      "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/tapaswini_choudhary1.jpeg",
+      "title": "Certified NLP Coach ( https://tapaswini.com )",
+      "message": "Learn to heal your self with SOUL MIRROR HUB from certified NLP coach Tapaswinee Choudhary. For Inner Transformation Coach. (Neuro Linguistic Programming.) Contact: https://tapaswinee.com.",
+      "url": "https://tapaswinee.com/",
+      "priority": 10
     }
   ]
 }
