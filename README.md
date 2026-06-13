@@ -58,6 +58,12 @@ in place of hardcording:
 ```
     
 
+## Another approach
+
+```
+<script defer src="https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js?v=1.0.0"></script>
+```
+
 
 # To purge:
 
