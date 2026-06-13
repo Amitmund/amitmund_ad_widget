@@ -65,6 +65,29 @@ in place of hardcording:
 ```
 
 
+### Or another options
+
+```
+<script>
+function loadWidget() {
+    const old = document.getElementById('ad-widget');
+
+    if (old) old.remove();
+
+    const s = document.createElement('script');
+    s.id = 'ad-widget';
+    s.src = `https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js?t=${Date.now()}`;
+    document.body.appendChild(s);
+}
+
+loadWidget();
+setInterval(loadWidget, 15 * 60 * 1000);
+</script>
+```
+
+---
+
+
 # To purge:
 
 ```
