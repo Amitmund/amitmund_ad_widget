@@ -12,7 +12,7 @@
       .then(config => {
         if (!config || !Array.isArray(config.ads) || config.ads.length === 0) return;
         
-        // 🎯 Compute Weighted Roulette Selection & Slicing using streamlined single keys
+        // 🎯 Compute Weighted Roulette Selection & Slicing
         config.ads = processWeightedPriorities(config.ads, MAX_DISPLAY_ADS);
         
         buildWidget(config);
@@ -39,13 +39,17 @@
     }
   }
 
-  // 🧠 Streamlined Weighted Probability Roulette Selection Engine
+  // 🧠 Robust Weighted Probability Roulette Selection Engine (Handles Legacy Keys Safely)
   function processWeightedPriorities(allAds, maxBudget) {
-    // 1. Instantly isolate critical safety notices using ONLY template_type
-    const criticalAlerts = allAds.filter(ad => ad.template_type === 'negative');
+    // 1. Instantly isolate critical safety notices (supports both clean and legacy keys)
+    const criticalAlerts = allAds.filter(ad => 
+      ad.template_type === 'negative' || ad.template === 'negative'
+    );
 
     // 2. Isolate normal candidates for the weighted selection pool
-    const lotteryPool = allAds.filter(ad => ad.template_type !== 'negative');
+    const lotteryPool = allAds.filter(ad => 
+      ad.template_type !== 'negative' && ad.template !== 'negative'
+    );
 
     const chosenAds = [...criticalAlerts];
     
@@ -93,12 +97,22 @@
     const track = document.createElement("div");
     track.className = "ad-track";
 
+    // 🛡️ SELF-HEALING BUFFER PAD: If total ads chosen are small (< 5), 
+    // duplicate the pool inline so the track overflows the screen width to preserve the loop animation seamless view footprint.
+    let renderingPool = [...config.ads];
+    if (renderingPool.length > 0 && renderingPool.length < 5) {
+      while (renderingPool.length < 10) {
+        renderingPool = renderingPool.concat([...config.ads]);
+      }
+    }
+
+    // Dynamic scroll duration scales relative to active cards list density counts
     const calculatedSpeed = config.scrollSpeed || 1;
-    const duration = Math.max(5, (config.ads.length * 5) / calculatedSpeed);
+    const duration = Math.max(5, (renderingPool.length * 4.5) / calculatedSpeed);
     track.style.setProperty('--scroll-duration', `${duration}s`);
 
-    const originalCards = config.ads.map(createCard);
-    const clonedCards = config.ads.map(createCard);
+    const originalCards = renderingPool.map(createCard);
+    const clonedCards = renderingPool.map(createCard);
 
     originalCards.forEach(card => track.appendChild(card));
     clonedCards.forEach(clone => {
@@ -110,18 +124,23 @@
     (document.body || document.documentElement).appendChild(rail);
   }
 
-  // 🎨 Cleaned Card Generation (Strictly maps to image_url and template_type)
+  // 🎨 Multi-Tenant Robust Card Generation (Gracefully bridges clean and legacy payloads)
   function createCard(ad) {
     const a = document.createElement("a");
-    const currentTheme = ad.template_type || "promo";
+    
+    // Graceful fallback logic paths for card theme selectors
+    const currentTheme = ad.template_type || ad.template || "promo";
     
     a.className = `ad-card ${currentTheme}`;
     a.href = ad.url || "#";
     a.target = "_blank";
     a.rel = "noopener noreferrer";
 
+    // Graceful fallback logic paths for creative graphic asset URL attributes
+    const resolvedImage = ad.image_url || ad.image || "";
+
     a.innerHTML = `
-      <img class="ad-img" src="${ad.image_url}" 
+      <img class="ad-img" src="${resolvedImage}" 
            loading="lazy"
            onerror="this.onerror=null; this.src='https://via.placeholder.com/56?text=Ad'" 
            alt="${ad.title || 'Advertisement'} Thumbnail" />
