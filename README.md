@@ -11,6 +11,14 @@ https://www.jsdelivr.com/github
 
 ---
 
+13th/june/2026:
+
+I am also planing if we can add a version on the widget.js
+
+
+---
+
+
 # To be able to run the add
 
 ### Just add the following 1 line at your website.
@@ -84,6 +92,29 @@ loadWidget();
 setInterval(loadWidget, 15 * 60 * 1000);
 </script>
 ```
+
+
+
+### another one:
+
+```
+// widget-loader.js
+
+const ts = Math.floor(Date.now() / (15 * 60 * 1000));
+
+const s = document.createElement('script');
+s.src = `https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js?t=${ts}`;
+document.head.appendChild(s);
+
+```
+
+
+
+### Or not using jsDeliver and insted, consider service from your own domain, where you can set:
+
+```
+Cache-Control: max-age=900
+
 
 ---
 
