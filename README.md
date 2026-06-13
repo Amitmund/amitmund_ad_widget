@@ -18,6 +18,24 @@ I am also planing if we can add a version on the widget.js
 
 ---
 
+## Final:
+
+Just use
+
+```
+<script defer src="https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js"></script>
+```
+
+On all the website.
+
+Only on the testing site, do cache-burst.
+```
+<script defer src="https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js?v=1.0.0"></script>
+```
+
+
+
+---
 
 # To be able to run the add
 
