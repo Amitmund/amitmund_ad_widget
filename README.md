@@ -41,6 +41,24 @@ https://www.jsdelivr.com/github
 
 ```
 
+### OR
+
+in place of hardcording:
+
+```
+    <script>
+    (function() {
+        const ts = Math.floor(Date.now() / (15 * 60 * 1000));
+        const script = document.createElement('script');
+        script.src = `https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/widget.js?v=${ts}`;
+        script.defer = true;
+        document.head.appendChild(script);
+    })();
+    </script>
+```
+    
+
+
 # To purge:
 
 ```
