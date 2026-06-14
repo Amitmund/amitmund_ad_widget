@@ -27,12 +27,20 @@
       "url": "https://sretoolkit.com/ads/go/refrigerationac-work-at-bhawanipatna/",
       "priority": 7
     },
-        {
+    {
       "template_type": "promo",
       "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/tapaswini_choudhary1.jpeg",
       "title": "Certified NLP Coach ( https://tapaswini.com )",
       "message": "Learn to heal your self with SOUL MIRROR HUB from certified NLP coach Tapaswinee Choudhary. For Inner Transformation Coach. (Neuro Linguistic Programming.) Contact: https://tapaswinee.com.",
       "url": "https://tapaswinee.com/",
+      "priority": 10
+    },
+    {
+      "template_type": "promo",
+      "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/jagabandhu_muduli1.jpeg",
+      "title": "Swararbinda Biswasanti Bhajan Sandhya Bhubaneswar, Jagabandhu Muduli",
+      "message": "Want to have Bhajan Sandhya of Prabhu Jagannath, then please feel free to contact, Swararbinda Biswasanti Bhajan Sandhya, Bhubaneswar, Team of Jagabandhu Muduli. Contact: 9437630756 9583337221",
+      "url": "https://sretoolkit.com/ads/go/",
       "priority": 10
     }
   ]
