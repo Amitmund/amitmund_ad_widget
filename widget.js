@@ -83,6 +83,58 @@
     return array;
   }
 
+  // 🎯 FOOLPROOF RUNTIME LAYOUT COLLISION CONTROLLER
+  function autoOffsetFloatingElements() {
+    if (window.innerWidth > 768) return; // Strict execution escape: run on mobile only
+
+    const viewportHeight = window.innerHeight;
+
+    // Fast Selector Array: targets actionable tags or components explicitly using matching names
+    const candidates = document.querySelectorAll(
+      'button, a, [id*="btn"], [class*="btn"], [id*="scroll"], [class*="scroll"], [id*="roadmap"], [class*="roadmap"]'
+    );
+
+    candidates.forEach(el => {
+      // SRE Guard Rule: Ignore the ad rail element itself completely
+      if (el.id === 'ad-rail' || el.closest('#ad-rail')) return;
+
+      // 1. Fast dimensional bounding box triage check (Avoids reading deep computed styles early)
+      const rect = el.getBoundingClientRect();
+      
+      // If the node has no height/width or sits completely off-screen, skip it instantly
+      if (rect.height === 0 || rect.width === 0 || rect.top === 0) return;
+
+      // Guard Rule 2: Exclude large layout structural content frameworks blocks (max width/height limiters)
+      if (rect.width > 120 || rect.height > 120) return;
+
+      // 2. Proximity boundary metric checking: Is it physically within the bottom 100px zone?
+      const distanceFromBottom = viewportHeight - rect.bottom;
+      
+      if (rect.bottom > (viewportHeight - 100) && rect.top < (viewportHeight - 5)) {
+        try {
+          const style = window.getComputedStyle(el);
+          const position = style.position;
+
+          if (position === 'fixed' || position === 'absolute') {
+            const currentBottom = parseInt(style.bottom, 10) || 0;
+            
+            // Push it cleanly up above our container boundary footprint margin
+            el.style.setProperty('bottom', `${currentBottom + 100}px`, 'important');
+            el.style.setProperty('transition', 'bottom 0.2s ease-in-out', 'important');
+
+            // Layer index sanitization protection: prevent elements from slipping underneath our backdrop bar
+            const currentZIndex = parseInt(style.zIndex, 10);
+            if (!isNaN(currentZIndex) && currentZIndex >= 2147483647) {
+              el.style.setProperty('z-index', '2147483646', 'important');
+            }
+          }
+        } catch (e) {
+          // Fail silently to keep parent app operations running normally if cross-origin styles misbehave
+        }
+      }
+    });
+  }
+
   function buildWidget(config) {
     injectStyles();
 
@@ -114,6 +166,9 @@
 
     rail.appendChild(track);
     (document.body || document.documentElement).appendChild(rail);
+
+    // 🎯 Fire scanner once DOM threads settle
+    setTimeout(autoOffsetFloatingElements, 150);
   }
 
   function createCard(ad) {
@@ -266,23 +321,9 @@
         100% { transform: translate3d(-50%, 0, 0); }
       }
 
-      /* 📱 🆕 RESPONSIVE FIX: AUTOMATIC VISUAL OVERRIDE INTERCEPT RULES */
       @media (max-width: 768px) {
-        /* 1. Prevent the rail from devouring the bottom body content layout */
         body {
           padding-bottom: 100px !important;
-        }
-        
-        /* 2. Target common floating components on the site and push them cleanly above the rail */
-        .scroll-to-top, 
-        .scrolltop, 
-        #scroll-to-top, 
-        .back-to-top,
-        [class*="scroll-to-top"],
-        [id*="scroll-to-top"] {
-          bottom: 116px !important;
-          z-index: 2147483646 !important;
-          transition: bottom 0.3s ease-in-out;
         }
       }
     `;
