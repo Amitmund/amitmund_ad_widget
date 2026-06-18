@@ -41,19 +41,16 @@
 
   // 🧠 Robust Weighted Probability Roulette Selection Engine (Handles Legacy Keys Safely)
   function processWeightedPriorities(allAds, maxBudget) {
-    // 1. Instantly isolate critical safety notices (supports both clean and legacy keys)
     const criticalAlerts = allAds.filter(ad => 
       ad.template_type === 'negative' || ad.template === 'negative'
     );
 
-    // 2. Isolate normal candidates for the weighted selection pool
     const lotteryPool = allAds.filter(ad => 
       ad.template_type !== 'negative' && ad.template !== 'negative'
     );
 
     const chosenAds = [...criticalAlerts];
     
-    // 3. Roulette wheel loop selection down to display budget capacity boundaries
     while (chosenAds.length < maxBudget && lotteryPool.length > 0) {
       let totalWeight = 0;
       for (let i = 0; i < lotteryPool.length; i++) {
@@ -75,11 +72,9 @@
       }
     }
 
-    // 4. Shuffle the final combined list so pinned alerts don't camp at index 0
     return shuffleArray(chosenAds);
   }
 
-  // 🎲 In-Place Fisher-Yates Shuffling Algorithm
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -97,8 +92,6 @@
     const track = document.createElement("div");
     track.className = "ad-track";
 
-    // 🛡️ SELF-HEALING BUFFER PAD: If total ads chosen are small (< 5), 
-    // duplicate the pool inline so the track overflows the screen width to preserve the loop animation seamless view footprint.
     let renderingPool = [...config.ads];
     if (renderingPool.length > 0 && renderingPool.length < 5) {
       while (renderingPool.length < 10) {
@@ -106,7 +99,6 @@
       }
     }
 
-    // Dynamic scroll duration scales relative to active cards list density counts
     const calculatedSpeed = config.scrollSpeed || 1;
     const duration = Math.max(5, (renderingPool.length * 4.5) / calculatedSpeed);
     track.style.setProperty('--scroll-duration', `${duration}s`);
@@ -124,11 +116,8 @@
     (document.body || document.documentElement).appendChild(rail);
   }
 
-  // 🎨 Multi-Tenant Robust Card Generation (Gracefully bridges clean and legacy payloads)
   function createCard(ad) {
     const a = document.createElement("a");
-    
-    // Graceful fallback logic paths for card theme selectors
     const currentTheme = ad.template_type || ad.template || "promo";
     
     a.className = `ad-card ${currentTheme}`;
@@ -136,7 +125,6 @@
     a.target = "_blank";
     a.rel = "noopener noreferrer";
 
-    // Graceful fallback logic paths for creative graphic asset URL attributes
     const resolvedImage = ad.image_url || ad.image || "";
 
     a.innerHTML = `
@@ -276,6 +264,26 @@
       @keyframes adRailInfiniteLinearLoop {
         0% { transform: translate3d(0, 0, 0); }
         100% { transform: translate3d(-50%, 0, 0); }
+      }
+
+      /* 📱 🆕 RESPONSIVE FIX: AUTOMATIC VISUAL OVERRIDE INTERCEPT RULES */
+      @media (max-width: 768px) {
+        /* 1. Prevent the rail from devouring the bottom body content layout */
+        body {
+          padding-bottom: 100px !important;
+        }
+        
+        /* 2. Target common floating components on the site and push them cleanly above the rail */
+        .scroll-to-top, 
+        .scrolltop, 
+        #scroll-to-top, 
+        .back-to-top,
+        [class*="scroll-to-top"],
+        [id*="scroll-to-top"] {
+          bottom: 116px !important;
+          z-index: 2147483646 !important;
+          transition: bottom 0.3s ease-in-out;
+        }
       }
     `;
     document.head.appendChild(style);
