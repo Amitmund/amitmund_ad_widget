@@ -1,5 +1,9 @@
 (function () {
   const CONFIG_URL = "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget/config.json";
+  
+  // ⚙️ SYSTEM SETTINGS
+  const MAX_DISPLAY_ADS = 8;
+  const VIEW_DURATION_MS = 10000; // ⏱️ Custom timeframe window set to exactly 10 seconds
 
   if (window.__AD_RAIL_LOADED__) return;
   window.__AD_RAIL_LOADED__ = true;
@@ -9,11 +13,14 @@
       .then(config => {
         if (!config || !Array.isArray(config.ads) || config.ads.length === 0) return;
         
-        // 🎯 Choose exactly 1 mathematically optimized campaign card
-        const singleAd = selectSingleWeightedAd(config.ads);
-        if (!singleAd) return;
+        // 🎯 Compute Weighted Roulette Selection & Slicing
+        const filteredPool = processWeightedPriorities(config.ads, MAX_DISPLAY_ADS);
         
-        buildWidget(singleAd);
+        // 🎲 Extract exactly 1 non-repeating random ad using Session History tracking
+        const selectedAd = selectTrueRandomAd(filteredPool);
+        if (!selectedAd) return;
+        
+        buildWidget(selectedAd);
       })
       .catch(err => {
         console.error("AD WIDGET LOG ERROR:", err);
@@ -37,46 +44,77 @@
     }
   }
 
-  // 🧠 Optimized Single-Winner Weighted Roulette Wheel Selection
-  function selectSingleWeightedAd(allAds) {
-    // 1. Critical Safety Alerts take absolute absolute precedence
+  function processWeightedPriorities(allAds, maxBudget) {
     const criticalAlerts = allAds.filter(ad => 
       ad.template_type === 'negative' || ad.template === 'negative'
     );
-    if (criticalAlerts.length > 0) {
-      // If multiple critical alerts exist, pick one at random
-      return criticalAlerts[Math.floor(Math.random() * criticalAlerts.length)];
-    }
 
-    // 2. Triage standard candidates pool
     const lotteryPool = allAds.filter(ad => 
       ad.template_type !== 'negative' && ad.template !== 'negative'
     );
-    if (lotteryPool.length === 0) return null;
 
-    // 3. Compute cumulative weight boundaries
-    let totalWeight = 0;
-    for (let i = 0; i < lotteryPool.length; i++) {
-      const weight = Number(lotteryPool[i].priority);
-      totalWeight += (!isNaN(weight) && weight > 0) ? weight : 1;
-    }
-
-    let randomRoll = Math.random() * totalWeight;
+    const chosenAds = [...criticalAlerts];
     
-    // 4. Spin the wheel
-    for (let i = 0; i < lotteryPool.length; i++) {
-      const weight = Number(lotteryPool[i].priority);
-      const activeWeight = (!isNaN(weight) && weight > 0) ? weight : 1;
+    while (chosenAds.length < maxBudget && lotteryPool.length > 0) {
+      let totalWeight = 0;
+      for (let i = 0; i < lotteryPool.length; i++) {
+        const weight = Number(lotteryPool[i].priority);
+        totalWeight += (!isNaN(weight) && weight > 0) ? weight : 1;
+      }
+
+      let randomRoll = Math.random() * totalWeight;
       
-      randomRoll -= activeWeight;
-      if (randomRoll <= 0) {
-        return lotteryPool[i];
+      for (let i = 0; i < lotteryPool.length; i++) {
+        const weight = Number(lotteryPool[i].priority);
+        const activeWeight = (!isNaN(weight) && weight > 0) ? weight : 1;
+        
+        randomRoll -= activeWeight;
+        if (randomRoll <= 0) {
+          chosenAds.push(lotteryPool.splice(i, 1)[0]);
+          break;
+        }
       }
     }
-    return lotteryPool[0];
+
+    return shuffleArray(chosenAds);
   }
 
-  // 🎯 CENTRALLY OFFSET AND ADJUST EXISTING FLOATING ELEMENTS 
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  // 🧠 TRUE BLIND ROTATION ENGINE (Avoids immediate duplicates across click-navigation tracks)
+  function selectTrueRandomAd(pool) {
+    if (pool.length === 0) return null;
+    if (pool.length === 1) return pool[0];
+
+    // Read the tracking ID string of the ad displayed on the previous page view
+    const lastViewedSlug = sessionStorage.getItem('__LAST_VIEWED_AD_SLUG__');
+
+    // Filter out the last viewed ad to force true variety on click/refresh actions
+    let rotationCandidates = pool.filter(ad => ad.slug !== lastViewedSlug);
+    
+    // Fallback: If everything was filtered out, reset back to the full pool layout
+    if (rotationCandidates.length === 0) {
+      rotationCandidates = pool;
+    }
+
+    // Run an additional Fisher-Yates shuffle over candidates before pulling index 0
+    const shuffledCandidates = shuffleArray([...rotationCandidates]);
+    const finalSelection = shuffledCandidates[0];
+
+    // Commit the newly chosen ad identifier slug back into storage cache memory
+    if (finalSelection && finalSelection.slug) {
+      sessionStorage.setItem('__LAST_VIEWED_AD_SLUG__', finalSelection.slug);
+    }
+
+    return finalSelection;
+  }
+
   function adjustFloatingElements(offsetValue) {
     if (window.innerWidth > 768) return;
     const viewportHeight = window.innerHeight;
@@ -91,11 +129,10 @@
       if (rect.height === 0 || rect.width === 0 || rect.top === 0) return;
       if (rect.width > 120 || rect.height > 120) return;
 
-      if (rect.bottom > (viewportHeight - 120) && rect.top < (viewportHeight - 5)) {
+      if (rect.bottom > (viewportHeight - 140) && rect.top < (viewportHeight - 5)) {
         try {
           const style = window.getComputedStyle(el);
           if (style.position === 'fixed' || style.position === 'absolute') {
-            // Read or initialize baselines
             if (!el.hasAttribute('data-original-bottom')) {
               el.setAttribute('data-original-bottom', style.bottom);
             }
@@ -114,31 +151,36 @@
 
     const rail = document.createElement("div");
     rail.id = "ad-rail";
-    // Initialize offscreen for a smooth slide-in entry
-    rail.style.transform = "translateY(120px)"; 
+    rail.style.transform = "translateY(140px)"; // Start safely out of frame
 
     const card = createCard(ad);
     rail.appendChild(card);
     (document.body || document.documentElement).appendChild(rail);
 
-    // 🎬 ANIMATION LIFECYCLE MANAGEMENT STEPS
+    // Dynamic duration bindings to update progress indicator tracking speeds smoothly
+    const progressBar = card.querySelector('.ad-progress-bar');
+    if (progressBar) {
+      progressBar.style.animationDuration = `${VIEW_DURATION_MS}ms`;
+    }
+
+    // 🎬 TIMED NOTIFICATION LIFECYCLE MANAGEMENT
     
-    // Step 1: Smooth transition onto the viewpoint canvas after paint
+    // 1. Slide into view
     setTimeout(() => {
       rail.style.transform = "translateY(0)";
-      adjustFloatingElements(100); // Push floating icons up out of collision zone
-    }, 100);
+      adjustFloatingElements(110);
+    }, 150);
 
-    // Step 2: Hold visibility for 3 seconds, then reverse transition offscreen
+    // 2. Slide out of view exactly at custom duration mark
     setTimeout(() => {
-      rail.style.transform = "translateY(120px)";
-      adjustFloatingElements(0); // Return floating site layout icons to baseline coordinates
-    }, 3100); // 100ms entry delay + 3000ms duration
+      rail.style.transform = "translateY(140px)";
+      adjustFloatingElements(0);
+    }, 150 + VIEW_DURATION_MS);
 
-    // Step 3: Evict container completely from active DOM trees to release runtime resources
+    // 3. Complete eviction from DOM tree to release system threads
     setTimeout(() => {
       rail.remove();
-    }, 3600); // Wait for the 500ms slide-away transition curve to end cleanly
+    }, 150 + VIEW_DURATION_MS + 500);
   }
 
   function createCard(ad) {
@@ -161,6 +203,9 @@
         <div class="ad-title">${ad.title || ""}</div>
         <div class="ad-msg">${ad.message || ""}</div>
       </div>
+      <div class="ad-progress-container">
+        <div class="ad-progress-bar"></div>
+      </div>
     `;
     return a;
   }
@@ -178,7 +223,7 @@
       }
       #ad-rail {
         position: fixed;
-        bottom: 20px;
+        bottom: 24px;
         left: 0;
         width: 100%;
         height: auto;
@@ -187,34 +232,35 @@
         align-items: center;
         overflow: hidden;
         z-index: 2147483647;
-        pointer-events: none; /* Let clicks pass through outside the actual card boundary */
+        pointer-events: none;
         transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
       }
       .ad-card {
-        pointer-events: auto; /* Re-enable pointer capture on the interactive element itself */
+        pointer-events: auto;
         position: relative;
         display: flex;
         align-items: center;
-        width: 340px;
-        height: 84px;
+        width: 350px;
+        height: 86px;
         background: #ffffff;
-        border-radius: 16px;
+        border-radius: 18px;
         text-decoration: none !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: #111111 !important;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.18), 0 2px 4px rgba(0, 0, 0, 0.04);
         border: 1px solid rgba(15, 23, 42, 0.08);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden; /* Clips the inner progress tracker corners correctly */
       }
       .ad-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.2);
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
       }
       .ad-img {
-        width: 52px;
-        height: 52px;
+        width: 54px;
+        height: 54px;
         object-fit: cover;
-        border-radius: 10px;
+        border-radius: 12px;
         margin: 0 14px;
         border: 1px solid rgba(0, 0, 0, 0.06);
         background-color: #f1f5f9;
@@ -224,7 +270,7 @@
         flex-direction: column;
         justify-content: center;
         overflow: hidden;
-        padding-right: 50px;
+        padding-right: 55px;
       }
       .ad-title {
         font-size: 13px;
@@ -275,9 +321,34 @@
       .ad-card.negative::before { content: "ALERT"; color: #b91c1c; background: #fee2e2; }
       .ad-card.promo::before { content: "PARTNER"; color: #1d4ed8; background: #dbeafe; }
 
+      /* PROGRESS ANIMATION OVERLAYS */
+      .ad-progress-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: rgba(0, 0, 0, 0.02);
+      }
+      .ad-progress-bar {
+        height: 100%;
+        width: 100%;
+        background: #cbd5e1; /* Smooth neutral slide accent */
+        transform-origin: left;
+        animation: adRailExpiryCountdown linear forwards;
+      }
+      .ad-card.positive .ad-progress-bar { background: #34d399; }
+      .ad-card.negative .ad-progress-bar { background: #f87171; }
+      .ad-card.promo .ad-progress-bar { background: #60a5fa; }
+
+      @keyframes adRailExpiryCountdown {
+        0% { transform: scaleX(1); }
+        100% { transform: scaleX(0); }
+      }
+
       @media (max-width: 480px) {
         .ad-card {
-          width: 90vw; /* Perfect width adjustments across responsive devices */
+          width: 92vw;
         }
       }
     `;
