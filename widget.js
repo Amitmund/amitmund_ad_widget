@@ -3,7 +3,6 @@
   
   // ⚙️ SYSTEM SETTINGS
   const MAX_DISPLAY_ADS = 8;
-  const VIEW_DURATION_MS = 10000; // ⏱️ Custom timeframe window set to exactly 10 seconds
 
   if (window.__AD_RAIL_LOADED__) return;
   window.__AD_RAIL_LOADED__ = true;
@@ -87,27 +86,20 @@
     return array;
   }
 
-  // 🧠 TRUE BLIND ROTATION ENGINE (Avoids immediate duplicates across click-navigation tracks)
   function selectTrueRandomAd(pool) {
     if (pool.length === 0) return null;
     if (pool.length === 1) return pool[0];
 
-    // Read the tracking ID string of the ad displayed on the previous page view
     const lastViewedSlug = sessionStorage.getItem('__LAST_VIEWED_AD_SLUG__');
-
-    // Filter out the last viewed ad to force true variety on click/refresh actions
     let rotationCandidates = pool.filter(ad => ad.slug !== lastViewedSlug);
     
-    // Fallback: If everything was filtered out, reset back to the full pool layout
     if (rotationCandidates.length === 0) {
       rotationCandidates = pool;
     }
 
-    // Run an additional Fisher-Yates shuffle over candidates before pulling index 0
     const shuffledCandidates = shuffleArray([...rotationCandidates]);
     const finalSelection = shuffledCandidates[0];
 
-    // Commit the newly chosen ad identifier slug back into storage cache memory
     if (finalSelection && finalSelection.slug) {
       sessionStorage.setItem('__LAST_VIEWED_AD_SLUG__', finalSelection.slug);
     }
@@ -151,36 +143,35 @@
 
     const rail = document.createElement("div");
     rail.id = "ad-rail";
-    rail.style.transform = "translateY(140px)"; // Start safely out of frame
+    rail.style.transform = "translateY(140px)"; // Out of frame baseline
 
     const card = createCard(ad);
     rail.appendChild(card);
     (document.body || document.documentElement).appendChild(rail);
 
-    // Dynamic duration bindings to update progress indicator tracking speeds smoothly
-    const progressBar = card.querySelector('.ad-progress-bar');
-    if (progressBar) {
-      progressBar.style.animationDuration = `${VIEW_DURATION_MS}ms`;
+    // 🎯 INTERCEPT: CLOSE EVENT BINDINGS
+    const closeBtn = card.querySelector('.ad-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation(); // Stop anchor tag click routing
+        
+        // Slide away offscreen
+        rail.style.transform = "translateY(140px)";
+        adjustFloatingElements(0); // Restore site layouts instantly
+        
+        // Hard-evict container from document tree when transition ends
+        setTimeout(() => {
+          rail.remove();
+        }, 500);
+      });
     }
 
-    // 🎬 TIMED NOTIFICATION LIFECYCLE MANAGEMENT
-    
-    // 1. Slide into view
+    // Smooth entrance execution
     setTimeout(() => {
       rail.style.transform = "translateY(0)";
       adjustFloatingElements(110);
     }, 150);
-
-    // 2. Slide out of view exactly at custom duration mark
-    setTimeout(() => {
-      rail.style.transform = "translateY(140px)";
-      adjustFloatingElements(0);
-    }, 150 + VIEW_DURATION_MS);
-
-    // 3. Complete eviction from DOM tree to release system threads
-    setTimeout(() => {
-      rail.remove();
-    }, 150 + VIEW_DURATION_MS + 500);
   }
 
   function createCard(ad) {
@@ -195,6 +186,13 @@
     const resolvedImage = ad.image_url || ad.image || "";
 
     a.innerHTML = `
+      <button class="ad-close-btn" type="button" aria-label="Dismiss Advertisement">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
       <img class="ad-img" src="${resolvedImage}" 
            loading="lazy"
            onerror="this.onerror=null; this.src='https://via.placeholder.com/56?text=Ad'" 
@@ -202,9 +200,6 @@
       <div class="ad-body">
         <div class="ad-title">${ad.title || ""}</div>
         <div class="ad-msg">${ad.message || ""}</div>
-      </div>
-      <div class="ad-progress-container">
-        <div class="ad-progress-bar"></div>
       </div>
     `;
     return a;
@@ -250,12 +245,40 @@
         box-shadow: 0 15px 35px rgba(15, 23, 42, 0.18), 0 2px 4px rgba(0, 0, 0, 0.04);
         border: 1px solid rgba(15, 23, 42, 0.08);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        overflow: hidden; /* Clips the inner progress tracker corners correctly */
       }
       .ad-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
       }
+      
+      /* 🎯 DISMISS CONTROLLER BUTTON STYLING */
+      .ad-close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.05);
+        border: none;
+        border-radius: 50%;
+        color: #64748b;
+        cursor: pointer;
+        padding: 0;
+        z-index: 10;
+        transition: background 0.2s, color 0.2s;
+      }
+      .ad-close-btn:hover {
+        background: rgba(15, 23, 42, 0.1);
+        color: #0f172a;
+      }
+      .ad-close-btn svg {
+        width: 10px;
+        height: 10px;
+      }
+
       .ad-img {
         width: 54px;
         height: 54px;
@@ -270,7 +293,7 @@
         flex-direction: column;
         justify-content: center;
         overflow: hidden;
-        padding-right: 55px;
+        padding-right: 36px; /* Expanded clear zone to protect text overlapping cross button */
       }
       .ad-title {
         font-size: 13px;
@@ -303,47 +326,6 @@
       .promo {
         border-left: 5px solid #3b82f6;
         background: linear-gradient(90deg, #eff6ff 0%, #ffffff 30%);
-      }
-      
-      /* BADGES */
-      .ad-card::before {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: 0.05em;
-        padding: 2px 6px;
-        border-radius: 4px;
-        line-height: 1;
-      }
-      .ad-card.positive::before { content: "ACTIVE"; color: #047857; background: #d1fae5; }
-      .ad-card.negative::before { content: "ALERT"; color: #b91c1c; background: #fee2e2; }
-      .ad-card.promo::before { content: "PARTNER"; color: #1d4ed8; background: #dbeafe; }
-
-      /* PROGRESS ANIMATION OVERLAYS */
-      .ad-progress-container {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background: rgba(0, 0, 0, 0.02);
-      }
-      .ad-progress-bar {
-        height: 100%;
-        width: 100%;
-        background: #cbd5e1; /* Smooth neutral slide accent */
-        transform-origin: left;
-        animation: adRailExpiryCountdown linear forwards;
-      }
-      .ad-card.positive .ad-progress-bar { background: #34d399; }
-      .ad-card.negative .ad-progress-bar { background: #f87171; }
-      .ad-card.promo .ad-progress-bar { background: #60a5fa; }
-
-      @keyframes adRailExpiryCountdown {
-        0% { transform: scaleX(1); }
-        100% { transform: scaleX(0); }
       }
 
       @media (max-width: 480px) {
