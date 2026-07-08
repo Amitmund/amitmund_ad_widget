@@ -3,14 +3,6 @@
   "scrollSpeed": 1,
   "ads": [
     {
-      "template_type": "positive",
-      "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/subod-behera-car-sell.png",
-      "title": "Car on Sell at Bhawanipatna",
-      "message": "You can Buy a pre-owned nice car. Please contact Subod Padhi From Bhawanipatna at 7676690380.",
-      "priority": 1,
-      "url": "http://sretoolkit.com/ads/go/car-on-sell-at-bhawanipatna/"
-    },
-    {
       "template_type": "negative",
       "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/amitmund_ad_widget@main/assets/images/pradeep-painter.jpeg",
       "title": "ALERT Pradeep Raipur Painter",
@@ -21,10 +13,10 @@
     {
       "template_type": "promo",
       "image_url": "https://cdn.jsdelivr.net/gh/Amitmund/images@main/vrindavanschool/vrindavanSchool.png",
-      "title": "Vrindavan School (ITI)",
+      "title": "Vrindavan School, Now till ITI",
       "message": "Vrindavan Smart School is expending transport till ITI Check gate. Interested Parents Please feel free to contact.",
       "priority": 10,
-      "url": "http://sretoolkit.com/ads/go/vrindavan-school-iti/"
+      "url": "https://vrindavansmartschool.in/"
     },
     {
       "template_type": "promo",
